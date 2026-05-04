@@ -1,6 +1,5 @@
 '''
-Búsqueda de la política (Policy Search)
-Evaluación por simulación
+Búsqueda de la política (Policy Search) - CORREGIDO
 '''
 
 import random
@@ -26,18 +25,21 @@ def recompensa(s):
 
 # ====================== SIMULACIÓN ====================================
 
-def simular(politica, episodios=10):
+def simular(politica, episodios=10, max_pasos=10):
     total = 0
 
     for _ in range(episodios):
         estado = 'A'
 
-        while estado != objetivo:
+        for _ in range(max_pasos):  # 🔥 evita loops infinitos
             accion = politica[estado]
             siguiente = transiciones[estado][accion][0][0]
 
             total += recompensa(siguiente)
             estado = siguiente
+
+            if estado == objetivo:
+                break
 
     return total / episodios
 
@@ -56,17 +58,17 @@ def busqueda_politica(iteraciones=20):
         politica = politica_aleatoria()
         valor = simular(politica)
 
-        print(f"Iteración {i+1}: {politica} → {valor}")
+        print(f"Iteración {i+1}: {politica} → {valor:.2f}")
 
         if valor > mejor_valor:
             mejor_valor = valor
-            mejor_politica = politica
+            mejor_politica = politica.copy()  # 🔥 evitar referencia
 
     print("\nMejor política encontrada:")
     for s in mejor_politica:
         print(f"{s} → {mejor_politica[s]}")
 
-    print("Valor:", mejor_valor)
+    print("Valor:", round(mejor_valor, 2))
 
 # ====================== EJECUCIÓN =====================================
 
