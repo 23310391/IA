@@ -1,85 +1,84 @@
-arbol_profundo = {
+'''
+Heuristica
+
+'''
+
+
+# 1. Grafo a trabajar
+grafo_complejo = {
     'A': ['B', 'C'],
-    'B': ['D', 'E'],
-    'C': ['F'],
-    'D': ['G', 'H'],
-    'E': ['I'],
-    'F': ['J', 'K'],
-    'G': ['L'],
-    'I': ['M', 'N'],
-    'K': ['O'],
-    'L': ['P'],
-    'N': ['Q'],
-    'Q': ['R'],
-    # Nodos hoja
-    'H': [], 'J': [], 'M': [], 'O': [], 'P': [], 'R': []
+    'B': ['A', 'D', 'E'],
+    'C': ['A', 'F'],
+    'D': ['B', 'G', 'H'],
+    'E': ['B', 'I'],
+    'F': ['C', 'J', 'K'],
+    'G': ['D', 'L'],
+    'H': ['D'],
+    'I': ['E', 'M', 'N'],
+    'J': ['F'],
+    'K': ['F', 'O'],
+    'L': ['G', 'P'],
+    'M': ['I'],
+    'N': ['I', 'Q'],
+    'O': ['K'],
+    'P': ['L'],
+    'Q': ['N', 'R'],
+    'R': ['Q']
 }
 
-def busqueda_profundidad_limitada_recursiva(grafo, nodo_actual, meta, limite, camino_actual=[]):
-    """
-    Implementación recursiva nativa de DLS.
-    """
-    # Actualizamos el camino recorrido hasta este nodo
-    nuevo_camino = camino_actual + [nodo_actual]
-    profundidad_actual = len(camino_actual)
+# 2. La Heurística: Distancia estimada hacia 'Q'
+heuristica_hacia_Q = {
+    'Q': 0,   # meta
+    'N': 1, 'R': 1, 
+    'I': 2, 
+    'E': 3, 'M': 3, 
+    'B': 4, 
+    'A': 5, 'D': 5, 
+    'C': 6, 'G': 6, 'H': 6, 
+    'F': 7, 'L': 7, 
+    'J': 8, 'K': 8, 'P': 8, 
+    'O': 9
+}
+
+def busqueda_heuristica_voraz(grafo, heuristica, origen, meta):
+    print(f"--- Búsqueda Heurística Voraz (Origen: {origen}, Meta: {meta}) ---")
     
-    # Imprimimos para visualizar el rastro
-    print(f"Revisando: {nodo_actual} (Profundidad: {profundidad_actual}, Límite: {limite})")
-
-    # 1. Condición Base: ¿Es la Meta?
-    if nodo_actual == meta:
-        return "ÉXITO", nuevo_camino
-
-    # 2. Condición Base: ¿Alcanzamos el Límite?
-    if profundidad_actual >= limite:
-        # Checamos si el nodo tiene hijos a los que no podemos bajar
-        if grafo.get(nodo_actual, []):
-            return "CORTE", None # Hubo un corte de rama
-        else:
-            return "FALLO", None # Es una hoja normal dentro del límite
-
-    # 3. Paso Recursivo: Explorar hijos
-    hijos = grafo.get(nodo_actual, [])
-    hubo_corte_abajo = False
+    # Cola: (valor_heuristico, nodo, camino_recorrido)
+    cola = [(heuristica[origen], origen, [origen])]
     
-    for hijo in hijos:
-        # Llamada recursiva bajando un nivel
-        resultado, camino_final = busqueda_profundidad_limitada_recursiva(
-            grafo, hijo, meta, limite, nuevo_camino
-        )
+    # Memoria para Búsqueda en Grafos 
+    visitados = set()
+
+    while cola:
+        # Ordenamos la cola para que el nodo con la heurística más baja (más cercano) quede al frente
+        cola.sort(key=lambda x: x[0])
         
-        if resultado == "ÉXITO":
-            return "ÉXITO", camino_final
+        # Sacamos al mejor candidato actual
+        h_actual, nodo_actual, camino = cola.pop(0)
         
-        if resultado == "CORTE":
-            # Recordamos que hubo un corte en alguna rama inferior
-            hubo_corte_abajo = True 
+        print(f"Revisando nodo: {nodo_actual} (Estimación a meta: {h_actual})")
 
-    # Si terminamos de ver los hijos y no hubo éxito
-    if hubo_corte_abajo:
-        return "CORTE", None
-    else:
-        return "FALLO", None
+        # Preguntar si llegamos a la meta
+        if nodo_actual == meta:
+            print(f"\n¡ÉXITO! Meta '{meta}' encontrada rápidamente.")
+            print(f"Ruta óptima tomada: {camino}")
+            return True
 
-# --- FUNCIÓN AUXILIAR (WRAPPER) PARA FORMATEAR LA SALIDA ---
-def ejecutar_dls(grafo, origen, meta, limite):
-    print(f"\n--- Iniciando DLS (Meta: '{meta}', Límite: {limite}) ---")
-    resultado, camino = busqueda_profundidad_limitada_recursiva(grafo, origen, meta, limite)
-    
-    if resultado == "ÉXITO":
-        print(f"RESULTADO: ¡ÉXITO! Meta encontrada.")
-        print(f"Camino: {camino}")
-    elif resultado == "CORTE":
-        print(f"RESULTADO: CORTE (Cutoff). El límite de {limite} es demasiado bajo.")
-    else:
-        print(f"RESULTADO: FALLO. La meta no existe en las zonas accesibles.")
+        # Si es un nodo nuevo, lo exploramos
+        if nodo_actual not in visitados:
+            visitados.add(nodo_actual)
+            
+            # Obtenemos sus vecinos
+            vecinos = grafo.get(nodo_actual, [])
+            for vecino in vecinos:
+                if vecino not in visitados:
+                    # Buscamos su heurística. Si un nodo no está en el diccionario, 
+                    # le damos infinito para no ir hacia allá (float('inf')).
+                    h_vecino = heuristica.get(vecino, float('inf'))
+                    cola.append((h_vecino, vecino, camino + [vecino]))
+                    
+    print(f"\nLa meta '{meta}' no se pudo encontrar.")
+    return False
 
-# --- PRUEBAS DEL CÓDIGO ---
-# Recordamos que la Meta 'Q' está en profundidad 5.
-
-# PRUEBA 1: Límite muy bajo (Nivel 3). Debería dar CORTE.
-ejecutar_dls(arbol_profundo, 'A', 'Q', limite=3)
-
-# PRUEBA 2: Límite exacto (Nivel 5). Debería dar ÉXITO.
-ejecutar_dls(arbol_profundo, 'A', 'Q', limite=5)
-
+# --- PRUEBA DEL CÓDIGO ---
+busqueda_heuristica_voraz(grafo_complejo, heuristica_hacia_Q, origen='A', meta='Q')

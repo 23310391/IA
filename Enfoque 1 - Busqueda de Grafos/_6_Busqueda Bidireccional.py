@@ -1,85 +1,106 @@
-arbol_profundo = {
+'''
+Busqueda bidireccional. 
+En la búsqueda bidireccional, se realizan dos búsquedas simultáneas: una desde el nodo inicial hacia la meta 
+y otra desde la meta hacia el nodo inicial.
+El objetivo es encontrar un punto de encuentro entre ambas búsquedas, lo que puede reducir significativamente 
+el tiempo de búsqueda en comparación con la búsqueda unidireccional, especialmente en grafos grandes.
+
+
+reduce el espacio de busqueda a la mitad
+
+'''
+
+a# Nuestro grafo profundo transformado a NO DIRIGIDO (Doble sentido)
+grafo_bidireccional = {
     'A': ['B', 'C'],
-    'B': ['D', 'E'],
-    'C': ['F'],
-    'D': ['G', 'H'],
-    'E': ['I'],
-    'F': ['J', 'K'],
-    'G': ['L'],
-    'I': ['M', 'N'],
-    'K': ['O'],
-    'L': ['P'],
-    'N': ['Q'],
-    'Q': ['R'],
-    # Nodos hoja
-    'H': [], 'J': [], 'M': [], 'O': [], 'P': [], 'R': []
+    'B': ['A', 'D', 'E'],
+    'C': ['A', 'F'],
+    'D': ['B', 'G', 'H'],
+    'E': ['B', 'I'],
+    'F': ['C', 'J', 'K'],
+    'G': ['D', 'L'],
+    'H': ['D'],
+    'I': ['E', 'M', 'N'],
+    'J': ['F'],
+    'K': ['F', 'O'],
+    'L': ['G', 'P'],
+    'M': ['I'],
+    'N': ['I', 'Q'],
+    'O': ['K'],
+    'P': ['L'],
+    'Q': ['N', 'R'],
+    'R': ['Q']
 }
 
-def busqueda_profundidad_limitada_recursiva(grafo, nodo_actual, meta, limite, camino_actual=[]):
-    """
-    Implementación recursiva nativa de DLS.
-    """
-    # Actualizamos el camino recorrido hasta este nodo
-    nuevo_camino = camino_actual + [nodo_actual]
-    profundidad_actual = len(camino_actual)
+def busqueda_bidireccional_nativa(grafo, origen, meta):
+    # Colas de búsqueda
+    cola_frente = [origen]
+    cola_atras = [meta]
     
-    # Imprimimos para visualizar el rastro
-    print(f"Revisando: {nodo_actual} (Profundidad: {profundidad_actual}, Límite: {limite})")
+    # Registramos de dónde venimos para poder dibujar la ruta final
+    padres_frente = {origen: None}
+    padres_atras = {meta: None}
 
-    # 1. Condición Base: ¿Es la Meta?
-    if nodo_actual == meta:
-        return "ÉXITO", nuevo_camino
+    print(f"Iniciando Búsqueda Bidireccional de '{origen}' a '{meta}'...")
 
-    # 2. Condición Base: ¿Alcanzamos el Límite?
-    if profundidad_actual >= limite:
-        # Checamos si el nodo tiene hijos a los que no podemos bajar
-        if grafo.get(nodo_actual, []):
-            return "CORTE", None # Hubo un corte de rama
-        else:
-            return "FALLO", None # Es una hoja normal dentro del límite
-
-    # 3. Paso Recursivo: Explorar hijos
-    hijos = grafo.get(nodo_actual, [])
-    hubo_corte_abajo = False
-    
-    for hijo in hijos:
-        # Llamada recursiva bajando un nivel
-        resultado, camino_final = busqueda_profundidad_limitada_recursiva(
-            grafo, hijo, meta, limite, nuevo_camino
-        )
+    while cola_frente and cola_atras:
         
-        if resultado == "ÉXITO":
-            return "ÉXITO", camino_final
+        # --- 1. PASO HACIA ADELANTE ---
+        actual_frente = cola_frente.pop(0)
+        print(f"[Frente] Revisando: {actual_frente}")
         
-        if resultado == "CORTE":
-            # Recordamos que hubo un corte en alguna rama inferior
-            hubo_corte_abajo = True 
+        # Comprobamos intersección
+        if actual_frente in padres_atras:
+            print(f"\n¡INTERSECCIÓN ENCONTRADA EN EL NODO '{actual_frente}'!")
+            return construir_camino(actual_frente, padres_frente, padres_atras)
+            
+        # Expandimos hacia adelante
+        for vecino in grafo.get(actual_frente, []):
+            if vecino not in padres_frente:
+                padres_frente[vecino] = actual_frente
+                cola_frente.append(vecino)
 
-    # Si terminamos de ver los hijos y no hubo éxito
-    if hubo_corte_abajo:
-        return "CORTE", None
-    else:
-        return "FALLO", None
+        # --- 2. PASO HACIA ATRÁS ---
+        actual_atras = cola_atras.pop(0)
+        print(f"[Atrás ] Revisando: {actual_atras}")
+        
+        # Comprobamos intersección
+        if actual_atras in padres_frente:
+            print(f"\n¡INTERSECCIÓN ENCONTRADA EN EL NODO '{actual_atras}'!")
+            return construir_camino(actual_atras, padres_frente, padres_atras)
+            
+        # Expandimos hacia atrás
+        for vecino in grafo.get(actual_atras, []):
+            if vecino not in padres_atras:
+                padres_atras[vecino] = actual_atras
+                cola_atras.append(vecino)
 
-# --- FUNCIÓN AUXILIAR (WRAPPER) PARA FORMATEAR LA SALIDA ---
-def ejecutar_dls(grafo, origen, meta, limite):
-    print(f"\n--- Iniciando DLS (Meta: '{meta}', Límite: {limite}) ---")
-    resultado, camino = busqueda_profundidad_limitada_recursiva(grafo, origen, meta, limite)
+    print("\nNo se encontró ningún camino.")
+    return False
+
+# --- FUNCIÓN AUXILIAR PARA UNIR LOS TÚNELES ---
+def construir_camino(nodo_interseccion, padres_frente, padres_atras):
+    # 1. Construimos desde el origen hasta la intersección
+    camino_frente = []
+    nodo_actual = nodo_interseccion
+    while nodo_actual is not None:
+        camino_frente.append(nodo_actual)
+        nodo_actual = padres_frente[nodo_actual]
+    camino_frente.reverse() # Lo volteamos porque lo armamos de atrás para adelante
+
+    # 2. Construimos desde la intersección hasta la meta
+    camino_atras = []
+    nodo_actual = padres_atras[nodo_interseccion] # Empezamos un nodo después para no duplicar la intersección
+    while nodo_actual is not None:
+        camino_atras.append(nodo_actual)
+        nodo_actual = padres_atras[nodo_actual]
+        
+    # Unimos ambos caminos
+    camino_total = camino_frente + camino_atras
     
-    if resultado == "ÉXITO":
-        print(f"RESULTADO: ¡ÉXITO! Meta encontrada.")
-        print(f"Camino: {camino}")
-    elif resultado == "CORTE":
-        print(f"RESULTADO: CORTE (Cutoff). El límite de {limite} es demasiado bajo.")
-    else:
-        print(f"RESULTADO: FALLO. La meta no existe en las zonas accesibles.")
+    print(f"Camino Final: {camino_total}")
+    return camino_total
 
-# --- PRUEBAS DEL CÓDIGO ---
-# Recordamos que la Meta 'Q' está en profundidad 5.
-
-# PRUEBA 1: Límite muy bajo (Nivel 3). Debería dar CORTE.
-ejecutar_dls(arbol_profundo, 'A', 'Q', limite=3)
-
-# PRUEBA 2: Límite exacto (Nivel 5). Debería dar ÉXITO.
-ejecutar_dls(arbol_profundo, 'A', 'Q', limite=5)
-
+# --- PRUEBA DEL CÓDIGO ---
+# Vamos a buscar el camino desde 'A' hasta 'Q' (que está lejos, en el nivel 5)
+busqueda_bidireccional_nativa(grafo_bidireccional, origen='A', meta='Q')

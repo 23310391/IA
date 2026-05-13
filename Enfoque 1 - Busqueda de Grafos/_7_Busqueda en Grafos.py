@@ -1,85 +1,70 @@
-arbol_profundo = {
+'''
+busqueda en grafos. 
+evita loops infinitos
+
+'''
+
+# Nuestro grafo con conexiones de doble sentido (contiene ciclos)
+grafo_bidireccional = {
     'A': ['B', 'C'],
-    'B': ['D', 'E'],
-    'C': ['F'],
-    'D': ['G', 'H'],
-    'E': ['I'],
-    'F': ['J', 'K'],
-    'G': ['L'],
-    'I': ['M', 'N'],
-    'K': ['O'],
-    'L': ['P'],
-    'N': ['Q'],
-    'Q': ['R'],
-    # Nodos hoja
-    'H': [], 'J': [], 'M': [], 'O': [], 'P': [], 'R': []
+    'B': ['A', 'D', 'E'],
+    'C': ['A', 'F'],
+    'D': ['B', 'G', 'H'],
+    'E': ['B', 'I'],
+    'F': ['C', 'J', 'K'],
+    'G': ['D', 'L'],
+    'H': ['D'],
+    'I': ['E', 'M', 'N'],
+    'J': ['F'],
+    'K': ['F', 'O'],
+    'L': ['G', 'P'],
+    'M': ['I'],
+    'N': ['I', 'Q'],
+    'O': ['K'],
+    'P': ['L'],
+    'Q': ['N', 'R'],
+    'R': ['Q']
 }
 
-def busqueda_profundidad_limitada_recursiva(grafo, nodo_actual, meta, limite, camino_actual=[]):
-    """
-    Implementación recursiva nativa de DLS.
-    """
-    # Actualizamos el camino recorrido hasta este nodo
-    nuevo_camino = camino_actual + [nodo_actual]
-    profundidad_actual = len(camino_actual)
+def busqueda_en_grafos(grafo, origen, meta):
+    print(f"--- Iniciando Búsqueda en Grafos (Origen: {origen}, Meta: {meta}) ---")
     
-    # Imprimimos para visualizar el rastro
-    print(f"Revisando: {nodo_actual} (Profundidad: {profundidad_actual}, Límite: {limite})")
-
-    # 1. Condición Base: ¿Es la Meta?
-    if nodo_actual == meta:
-        return "ÉXITO", nuevo_camino
-
-    # 2. Condición Base: ¿Alcanzamos el Límite?
-    if profundidad_actual >= limite:
-        # Checamos si el nodo tiene hijos a los que no podemos bajar
-        if grafo.get(nodo_actual, []):
-            return "CORTE", None # Hubo un corte de rama
-        else:
-            return "FALLO", None # Es una hoja normal dentro del límite
-
-    # 3. Paso Recursivo: Explorar hijos
-    hijos = grafo.get(nodo_actual, [])
-    hubo_corte_abajo = False
+    # 1. Cola para guardar el estado (nodo_actual, camino_recorrido)
+    cola = [(origen, [origen])]
     
-    for hijo in hijos:
-        # Llamada recursiva bajando un nivel
-        resultado, camino_final = busqueda_profundidad_limitada_recursiva(
-            grafo, hijo, meta, limite, nuevo_camino
-        )
-        
-        if resultado == "ÉXITO":
-            return "ÉXITO", camino_final
-        
-        if resultado == "CORTE":
-            # Recordamos que hubo un corte en alguna rama inferior
-            hubo_corte_abajo = True 
+    # 2. El conjunto de memoria
+    visitados = set()
 
-    # Si terminamos de ver los hijos y no hubo éxito
-    if hubo_corte_abajo:
-        return "CORTE", None
-    else:
-        return "FALLO", None
+    while cola:
+        nodo_actual, camino = cola.pop(0)
 
-# --- FUNCIÓN AUXILIAR (WRAPPER) PARA FORMATEAR LA SALIDA ---
-def ejecutar_dls(grafo, origen, meta, limite):
-    print(f"\n--- Iniciando DLS (Meta: '{meta}', Límite: {limite}) ---")
-    resultado, camino = busqueda_profundidad_limitada_recursiva(grafo, origen, meta, limite)
-    
-    if resultado == "ÉXITO":
-        print(f"RESULTADO: ¡ÉXITO! Meta encontrada.")
-        print(f"Camino: {camino}")
-    elif resultado == "CORTE":
-        print(f"RESULTADO: CORTE (Cutoff). El límite de {limite} es demasiado bajo.")
-    else:
-        print(f"RESULTADO: FALLO. La meta no existe en las zonas accesibles.")
+        # Si llegamos a la meta, terminamos
+        if nodo_actual == meta:
+            print(f"\n¡ÉXITO! Meta '{meta}' encontrada.")
+            print(f"Camino final: {camino}")
+            return True
 
-# --- PRUEBAS DEL CÓDIGO ---
-# Recordamos que la Meta 'Q' está en profundidad 5.
+        # ¿Ya estuve aquí?
+        if nodo_actual not in visitados:
+            # Lo marcamos como visitado (lo anotamos en la memoria)
+            visitados.add(nodo_actual)
+            print(f"\n[+] Explorando nodo nuevo: {nodo_actual}")
+            
+            # Revisamos a sus vecinos
+            vecinos = grafo.get(nodo_actual, [])
+            for vecino in vecinos:
+                # Si el vecino ya está en nuestra memoria, lo ignoramos para evitar ciclos
+                if vecino in visitados:
+                    print(f"    -> Ignorando '{vecino}' (Ya está en la memoria/visitados)")
+                else:
+                    # Si es nuevo, lo agregamos a la cola para explorarlo después
+                    print(f"    -> Agregando '{vecino}' a la cola")
+                    cola.append((vecino, camino + [vecino]))
+                    
+    print(f"\nLa meta '{meta}' no se pudo alcanzar.")
+    return False
 
-# PRUEBA 1: Límite muy bajo (Nivel 3). Debería dar CORTE.
-ejecutar_dls(arbol_profundo, 'A', 'Q', limite=3)
-
-# PRUEBA 2: Límite exacto (Nivel 5). Debería dar ÉXITO.
-ejecutar_dls(arbol_profundo, 'A', 'Q', limite=5)
-
+# --- PRUEBA DEL CÓDIGO ---
+# Vamos a buscar un nodo cercano, por ejemplo 'I', para no saturar la pantalla, 
+# pero lo suficiente para ver cómo evita regresar a 'A' o a 'B'.
+busqueda_en_grafos(grafo_bidireccional, origen='A', meta='I')
