@@ -1,3 +1,11 @@
+'''
+Busqueda en profundidad limitada (DLS)
+Es una variación de la búsqueda en profundidad que introduce un límite de profundidad para evitar caer 
+en ramas infinitas o demasiado profundas.
+Se detiene en un limite definido.
+
+'''
+
 arbol_profundo = {
     'A': ['B', 'C'],
     'B': ['D', 'E'],
@@ -16,9 +24,11 @@ arbol_profundo = {
 }
 
 def busqueda_profundidad_limitada_recursiva(grafo, nodo_actual, meta, limite, camino_actual=[]):
-    """
-    Implementación recursiva nativa de DLS.
-    """
+    # grafo       → estructura del árbol a explorar
+    # nodo_actual → nodo que se está evaluando en esta llamada
+    # meta        → nodo que buscamos
+    # limite      → profundidad máxima permitida
+    # camino_actual → nodos visitados hasta llegar aquí
     # Actualizamos el camino recorrido hasta este nodo
     nuevo_camino = camino_actual + [nodo_actual]
     profundidad_actual = len(camino_actual)

@@ -2,6 +2,11 @@
 Busqueda en profundidad
 Usa una lista LIFO
 
+Busca por ramas, primero A, luego B, luego D, si D no es el objetivo, regresa a B y va a E, si E no es el objetivo, 
+regresa a B y luego a A, y va a C, luego a F.
+
+no garantiza el camino mas corto, pero si encuentra el objetivo, lo hace de forma rapida, sin revisar todos los nodos
+
 '''
 GRAFO = {
     'A': ['B', 'C'],
@@ -22,8 +27,8 @@ def imprimir_camino(historial, nombre_algoritmo):
 # ====================== BÚSQUEDA EN PROFUNDIDAD =========================
 
 def busqueda_profundidad(inicio, objetivo):
-    pila = [inicio]          # Pila (LIFO)
-    visitados = set()
+    pila = [inicio]          # Pila (LIFO), el último elemento en entrar es el primero en salir
+    visitados = set()       # evita visitar nodos repetidos
     historial = []
 
     while pila:

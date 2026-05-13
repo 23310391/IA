@@ -5,7 +5,7 @@ no da el camino exacto, si da el camino de menor costo
 '''
 
 GRAFO_COSTO = {
-    'A': [('B', 1), ('C', 4)],
+    'A': [('B', 1), ('C', 4)], #nodo A, vecinos B y C, con pesos 1 y 4 respectivamente
     'B': [('D', 2), ('E', 5)],
     'C': [('F', 1)],
     'D': [],

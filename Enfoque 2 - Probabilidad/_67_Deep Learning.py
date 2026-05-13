@@ -29,16 +29,15 @@ y = np.array([0, 0, 0, 1, 1, 1])
 modelo = Sequential()
 
 # Capa oculta
-modelo.add(Dense(
-    4,
-    input_dim=2,
+modelo.add(Dense( # 4 neuronas, pesos inicializados aleatoriamente
+                  # ReLU descarta valores negativos, resalta patrones importantes
     activation='relu'
 ))
 
 # Capa de salida
-modelo.add(Dense(
+modelo.add(Dense( 
     1,
-    activation='sigmoid'
+    activation='sigmoid' # convierte la salida a probabilidad entre 0 y 1
 ))
 
 # ====================== COMPILAR =====================================
@@ -54,13 +53,13 @@ modelo.compile(
 modelo.fit(
     X,
     y,
-    epochs=200,
+    epochs=200, # 200 iteraciones: en cada una se ajustan los pesos para reducir el error
     verbose=0
 )
 
 # ====================== PREDICCIÓN ===================================
 
-nuevo = np.array([[4, 2]])
+nuevo = np.array([[4, 2]]) #con 4 horas de estudio y 2 tareas, que tan probable es que apruebe
 
 prediccion = modelo.predict(nuevo)
 

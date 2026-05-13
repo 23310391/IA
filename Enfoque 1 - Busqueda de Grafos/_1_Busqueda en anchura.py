@@ -2,6 +2,9 @@
 Algoritmo busqueda en anchura
 recorre el grafo por niveles, encuentra el objetivo, sin dar el camino mas optimo de forma explicita
 utiliza una cola FIFO
+
+Revisa capa por capa, primero A, despues los vecinos, B y C, despues sus vecinos, D, E, F.
+
 '''
 
 from collections import deque #double ended queue, permite agregar elementos al inicio y al final de la cola
@@ -38,7 +41,7 @@ def busqueda_anchura(inicio, objetivo):
             print("Encontrado:", actual)
             return
 
-        for vecino in GRAFO[actual]:
+        for vecino in GRAFO[actual]: #visitamos los vecinos del nodo actual, para encontrar el nodo objetivo
             if vecino not in visitados:
                 cola.append(vecino)
                 visitados.add(vecino)
