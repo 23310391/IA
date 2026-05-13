@@ -1,3 +1,9 @@
+'''
+no explora todos los caminos ni uno solo, como hill, analiza las mejores opciones, con un parametro k, segun la heuristica
+
+
+'''
+
 GRAFO = {
     'A': ['B', 'C'],
     'B': ['D', 'E'],
@@ -25,8 +31,8 @@ def imprimir_camino(historial, nombre_algoritmo):
     for i, nodo in enumerate(historial):
         print(f"Paso {i}: {nodo}")
 
-# 14. BEAM SEARCH
-# ============================================================
+
+# ==========================BEAM SEARCH==================================
 
 def beam_search(inicio, objetivo, k=2):
     frontera = [inicio]

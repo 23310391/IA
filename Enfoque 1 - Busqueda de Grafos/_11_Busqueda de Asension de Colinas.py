@@ -1,3 +1,7 @@
+'''
+va al inmediato mejor vecino, sin importar si es mejor o peor que el nodo actual, 
+lo que puede llevar a quedar atrapado en un máximo local
+'''
 # Nuestro grafo de prueba
 grafo_colinas = {
     'Inicio': ['A', 'B'],

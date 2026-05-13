@@ -1,3 +1,8 @@
+'''
+busqueda estrella, toma en cuenta que tan lejos está la meta
+y los costos reales, es decir, el costo acumulado desde el nodo inicial
+'''
+
 # Nuestro grafo bidireccional
 grafo_complejo = {
     'A': ['B', 'C'], 'B': ['A', 'D', 'E'], 'C': ['A', 'F'],

@@ -1,6 +1,8 @@
 '''
 Deep Learning simple
 Red neuronal básica
+
+
 '''
 
 from tensorflow.keras.models import Sequential
@@ -31,6 +33,8 @@ modelo = Sequential()
 # Capa oculta
 modelo.add(Dense( # 4 neuronas, pesos inicializados aleatoriamente
                   # ReLU descarta valores negativos, resalta patrones importantes
+    input_dim=2, # 2 entradas: horas_estudio y tareas
+    units=4,
     activation='relu'
 ))
 

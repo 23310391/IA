@@ -10,7 +10,7 @@ reduce el espacio de busqueda a la mitad
 
 '''
 
-a# Nuestro grafo profundo transformado a NO DIRIGIDO (Doble sentido)
+# Nuestro grafo profundo transformado a NO DIRIGIDO (Doble sentido)
 grafo_bidireccional = {
     'A': ['B', 'C'],
     'B': ['A', 'D', 'E'],

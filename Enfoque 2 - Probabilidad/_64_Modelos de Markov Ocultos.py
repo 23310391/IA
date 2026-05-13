@@ -1,6 +1,9 @@
 '''
 Modelo Oculto de Markov (HMM)
 Algoritmo Forward
+
+Nos da el resultado de haber visto una secuencia de observaciones
+existen 2 estados, 2 probabilidades de transicion, y 3 probabilidades de emision (el resultado)
 '''
 
 # ====================== ESTADOS Y OBSERVACIONES =======================

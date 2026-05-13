@@ -1,3 +1,7 @@
+'''
+lo mismo que heuristica
+
+'''
 # Grafo
 grafo_complejo = {
     'A': ['B', 'C'], 'B': ['A', 'D', 'E'], 'C': ['A', 'F'],

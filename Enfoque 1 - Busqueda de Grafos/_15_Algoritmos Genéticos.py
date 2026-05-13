@@ -1,3 +1,10 @@
+'''
+Algoritmos geneticos
+basado en la supervivencia del mas fuerte
+sobreviven los 2 mejores nodos segun la heuristica, y generan hijos, que son los vecinos de esos nodos, 
+y asi sucesivamente, hasta llegar a la meta
+'''
+
 GRAFO = {
     'A': ['B', 'C'],
     'B': ['D', 'E'],
@@ -25,7 +32,7 @@ def imprimir_camino(historial, nombre):
         print(f"Paso {i}: {n}")
 
 # ============================================================
-# 15. ALGORITMO GENÉTICO (CORREGIDO)
+# 15. ALGORITMO GENÉTICO 
 # ============================================================
 
 import random

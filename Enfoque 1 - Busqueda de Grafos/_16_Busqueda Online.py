@@ -1,3 +1,9 @@
+'''
+Busqueda online
+explora en tiempo real en un entorno desconocido, tomando decisiones basadas en la información 
+disponible en cada paso, sin conocer el mapa completo del grafo.
+'''
+
 GRAFO = {
     'A': ['B', 'C'],
     'B': ['D', 'E'],
